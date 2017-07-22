@@ -4,7 +4,7 @@
   "description": "WaveGame a game where you drive a boat on water",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node_modules/.bin/webpack-dev-server"
   },
   "repository": {
     "type": "git",
@@ -21,6 +21,7 @@
     "typescript": "^2.4.2"
   },
   "devDependencies": {
-    "webpack": "^3.3.0"
+    "webpack": "^3.3.0",
+    "webpack-dev-server": "^2.5.1"
   }
 }
