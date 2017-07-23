@@ -2,8 +2,7 @@
     "compilerOptions": {
         "target": "es2017",
         "module": "commonjs",
-        "sourceMap": true,
-        "inlineSourceMap": true
+        "sourceMap": true
     },
     "include": [
         "src/**/*"
