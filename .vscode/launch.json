@@ -6,7 +6,7 @@
             "request": "launch",
             "name": "Launch Chrome against localhost",
             "sourceMaps": true,
-            "url": "http://localhost:8080/dist/index.html",
+            "url": "http://localhost:8080/",
             "webRoot": "${workspaceRoot}"
         },
         {
@@ -16,7 +16,10 @@
             "sourceMaps": true,
             "port": 9222,
             "webRoot": "${workspaceRoot}",
-            "diagnosticLogging": true
+            "diagnosticLogging": true,
+            "runtimeArgs": [
+                "--disk-cache-size=1"
+            ]
         }
     ]
 }
