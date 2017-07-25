@@ -4,7 +4,8 @@
   "description": "WaveGame a game where you drive a boat on water",
   "main": "index.js",
   "scripts": {
-    "start": "node_modules/.bin/webpack-dev-server"
+    "start": "node_modules/.bin/webpack-dev-server",
+    "build": "node_modules/.bin/webpack"
   },
   "repository": {
     "type": "git",
@@ -20,9 +21,10 @@
     "p2": "^0.7.1"
   },
   "devDependencies": {
+    "@types/pixi.js": "^4.5.1",
     "ts-loader": "^2.3.1",
+    "typescript": "^2.4.2",
     "webpack": "^3.3.0",
-    "webpack-dev-server": "^2.5.1",
-    "typescript": "^2.4.2"
+    "webpack-dev-server": "^2.5.1"
   }
 }
