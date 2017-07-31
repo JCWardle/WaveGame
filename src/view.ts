@@ -67,10 +67,8 @@ export default class View {
         let rectangle: PIXI.Graphics = new PIXI.Graphics();
         let rectangleHeight = 1;
         rectangle.beginFill(0x000080);
-        rectangle.drawRect(-50, -50, 100, 100);
+        rectangle.drawRect(-this.WIDTH / 2, (-this.HEIGHT / 2), this.WIDTH, this.WATER_HEIGHT);
         rectangle.endFill();
-        rectangle.x = 0;
-        rectangle.y = 0;
         this.container.addChild(rectangle);
     }
 
@@ -82,7 +80,7 @@ export default class View {
 
     private sizeStage() : void {
         this.widthScale = window.innerWidth / this.WIDTH;
-        this.heightScale = window.innerWidth / this.HEIGHT;
+        this.heightScale = window.innerHeight / this.HEIGHT;
         this.container.position.x =  this.application.renderer.width / 2; // center at origin
         this.container.position.y =  this.application.renderer.height / 2;
         this.container.scale.y = -this.heightScale; //Make up, up
