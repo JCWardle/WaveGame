@@ -1,5 +1,6 @@
 import * as p2 from 'p2';
 import IGameModel from './gameModel';
+import Constants from './constants';
 
 export default class Game {
     private boat:p2.Body;
@@ -8,29 +9,47 @@ export default class Game {
     private c = 0.8; // viscosity
 
     constructor() {
-        this.world = new p2.World();        
+        this.world = new p2.World({
+            gravity: [0, -10]
+        });        
         
         // Create "water surface"
         let planeShape: p2.Plane = new p2.Plane();
         let plane: p2.Body = new p2.Body({
-            position:[0,0]
+            position:[0, -(Constants.HEIGHT / 2) + Constants.WATER_HEIGHT]
         });
         plane.addShape(planeShape);
         this.world.addBody(plane);
 
         this.boat = new p2.Body({
             mass: 1,
-            position: [0,2]
+            position: [-(Constants.WIDTH / 2) + 20 , -(Constants.HEIGHT / 2) + Constants.WATER_HEIGHT + 25]
         });
 
-        this.boat.addShape(new p2.Circle ({
-            radius: 5
+        
+        this.boat.addShape(new p2.Convex ({
+            vertices: this.convertVertices(Constants.BOAT_VERTICES)
         }));
         this.world.addBody(this.boat);
 
         this.world.on('postStep', () => {
             this.applyAABBBuoyancyForces(this.boat, plane.position, this.k, this.c)
         })
+    }
+
+    private convertVertices(toConvert: number[]): number[][] {
+        let result: number[][] = [];
+        let x:number = null;
+        for(let i = 0; i < toConvert.length; i++){
+            if(x == null) {
+                x = toConvert[i];
+            } else {
+                let y:number = toConvert[i];
+                result.push([x, y]);
+                x = null;
+            }
+        }
+        return result;
     }
 
     private applyAABBBuoyancyForces(body: any, planePosition: number[], k: number, c: number) {

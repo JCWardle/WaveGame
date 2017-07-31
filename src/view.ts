@@ -2,18 +2,15 @@
 
 import * as PIXI from 'pixi.js';
 import IGameModel from './gameModel';
+import Constants from './constants';
 
 export default class View {
     private container:PIXI.Container;
-    private WATER_HEIGHT: number = 20;
     private widthScale: number;
     private heightScale: number;
     private waterStart: number;
     private boat: PIXI.Graphics;
     private application: PIXI.Application;
-
-    private HEIGHT: number = 1080
-    private WIDTH: number = 1920;
 
     constructor() {
         this.application = new PIXI.Application(window.innerWidth, window.innerHeight,
@@ -24,7 +21,7 @@ export default class View {
         this.application.view.style.display = 'block';
         document.body.appendChild(this.application.view);
 
-        this.waterStart = this.application.view.height - (this.application.view.height / this.WATER_HEIGHT);
+        this.waterStart = this.application.view.height - (this.application.view.height / Constants.WATER_HEIGHT);
 
         this.container = new PIXI.Container();
 
@@ -38,36 +35,34 @@ export default class View {
             this.sizeStage();
         };
         
-        this.application.stage.addChild(this.container);
+        this.application.stage.addChild(this.container);        
+        this.drawWater();
+        this.drawBoat();
         this.application.render();
-
-        this.boat = new PIXI.Graphics();
-        this.boat.beginFill(0x00000);
-
-        this.boat.drawPolygon([
-            0, 0,
-            50, 0,             
-            74, -25,
-            0, -25,
-            0, 0
-        ]);
-
-        this.boat.endFill();
     }
 
     public render(model: IGameModel): void {
-        this.drawWater();
 
         this.drawPlayer(model);
 
         this.application.render();
     }
 
+    private drawBoat(): void {
+        this.boat = new PIXI.Graphics();
+        this.boat.beginFill(0x00000);
+
+        this.boat.drawPolygon(Constants.BOAT_VERTICES);
+
+        this.boat.endFill();
+        this.container.addChild(this.boat);
+    }
+
     private drawWater(): void {
         let rectangle: PIXI.Graphics = new PIXI.Graphics();
         let rectangleHeight = 1;
         rectangle.beginFill(0x000080);
-        rectangle.drawRect(-this.WIDTH / 2, (-this.HEIGHT / 2), this.WIDTH, this.WATER_HEIGHT);
+        rectangle.drawRect(-Constants.WIDTH / 2, (-Constants.HEIGHT / 2), Constants.WIDTH, Constants.WATER_HEIGHT);
         rectangle.endFill();
         this.container.addChild(rectangle);
     }
@@ -79,8 +74,8 @@ export default class View {
     }
 
     private sizeStage() : void {
-        this.widthScale = window.innerWidth / this.WIDTH;
-        this.heightScale = window.innerHeight / this.HEIGHT;
+        this.widthScale = window.innerWidth / Constants.WIDTH;
+        this.heightScale = window.innerHeight / Constants.HEIGHT;
         this.container.position.x =  this.application.renderer.width / 2; // center at origin
         this.container.position.y =  this.application.renderer.height / 2;
         this.container.scale.y = -this.heightScale; //Make up, up
