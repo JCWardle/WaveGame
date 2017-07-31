@@ -1,15 +1,14 @@
-import * as p2 from 'p2'
+import * as p2 from 'p2';
+import IGameModel from './gameModel';
 
 export default class Game {
-    private water;
+    private boat:p2.Body;
     private world:p2.World;
     private k = 100; // up force per submerged "volume"
     private c = 0.8; // viscosity
 
     constructor() {
-        this.world = new p2.World({
-                gravity : [0,-10]
-            });        
+        this.world = new p2.World();        
         
         // Create "water surface"
         let planeShape: p2.Plane = new p2.Plane();
@@ -19,18 +18,18 @@ export default class Game {
         plane.addShape(planeShape);
         this.world.addBody(plane);
 
-        let boat: p2.Body = new p2.Body({
+        this.boat = new p2.Body({
             mass: 1,
             position: [0,2]
         });
 
-        boat.addShape(new p2.Circle ({
+        this.boat.addShape(new p2.Circle ({
             radius: 5
         }));
-        this.world.addBody(boat);
+        this.world.addBody(this.boat);
 
         this.world.on('postStep', () => {
-            this.applyAABBBuoyancyForces(boat, plane.position, this.k, this.c)
+            this.applyAABBBuoyancyForces(this.boat, plane.position, this.k, this.c)
         })
     }
 
@@ -87,7 +86,11 @@ export default class Game {
         }
     }
 
-    public update():void {
+    public update(t: number): IGameModel {
+        this.world.step(t);
 
+        return {
+            boat: this.boat
+        };
     }
 }
