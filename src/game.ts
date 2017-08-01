@@ -5,8 +5,8 @@ import Constants from './constants';
 export default class Game {
     private boat:p2.Body;
     private world:p2.World;
-    private k = 500; // up force per submerged "volume"
-    private c = 0.1; // viscosity
+    private k = 250; // up force per submerged "volume"
+    private viscosity = 0.1; // viscosity
 
     constructor() {
         this.world = new p2.World({
@@ -23,15 +23,15 @@ export default class Game {
 
         this.boat = new p2.Body({
             mass: 1,
-            position: [-(Constants.WIDTH / 2) + 20 , -(Constants.HEIGHT / 2) + Constants.WATER_HEIGHT + 75]
+            position: [-(Constants.WIDTH / 2) + 400 , -(Constants.HEIGHT / 2) + Constants.WATER_HEIGHT + 75],
+            angularVelocity: 0
         });
-
         
         this.boat.fromPolygon(this.convertVertices(Constants.BOAT_VERTICES));
         this.world.addBody(this.boat);
 
         this.world.on('postStep', () => {
-            this.applyAABBBuoyancyForces(this.boat, plane.position, this.k, this.c)
+            this.applyAABBBuoyancyForces(this.boat, plane.position, this.k, this.viscosity)
         })
     }
 
@@ -80,7 +80,7 @@ export default class Game {
             } else if(aabb.lowerBound[1] < planePosition[1]){
                 // Partially submerged
                 var width = aabb.upperBound[0] - aabb.lowerBound[0];
-                var height = aabb.upperBound[1] - aabb.lowerBound[1];
+                var height = (-(Constants.HEIGHT / 2) + Constants.WATER_HEIGHT) - aabb.lowerBound[1];
                 areaUnderWater = width * height;
                 p2.vec2.set(centerOfBouyancy, aabb.lowerBound[0] + width / 2, aabb.lowerBound[1] + height / 2);
             } else {
