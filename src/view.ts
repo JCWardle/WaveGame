@@ -62,7 +62,7 @@ export default class View {
         let rectangle: PIXI.Graphics = new PIXI.Graphics();
         let rectangleHeight = 1;
         rectangle.beginFill(0x000080);
-        rectangle.drawRect(-Constants.WIDTH / 2, (-Constants.HEIGHT / 2), Constants.WIDTH, Constants.WATER_HEIGHT);
+        rectangle.drawRect(-Constants.WIDTH / 2, (-Constants.HEIGHT / 2), Constants.WIDTH, Constants.WATER_HEIGHT * 2);
         rectangle.endFill();
         this.container.addChild(rectangle);
     }
