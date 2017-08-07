@@ -5,8 +5,8 @@ import Constants from './constants';
 export default class Game {
     private boat:p2.Body;
     private world:p2.World;
-    private k = 250; // up force per submerged "volume"
-    private viscosity = 0.1; // viscosity
+    private k = 100; // up force per submerged "volume"
+    private viscosity = 0.5; // viscosity
 
     constructor() {
         this.world = new p2.World({
@@ -23,7 +23,7 @@ export default class Game {
 
         this.boat = new p2.Body({
             mass: 1,
-            position: [-(Constants.WIDTH / 2) + 400 , -(Constants.HEIGHT / 2) + Constants.WATER_HEIGHT + 75],
+            position: [-(Constants.WIDTH / 2) + 400 , -(Constants.HEIGHT / 2) + Constants.WATER_HEIGHT + 50],
             angularVelocity: 0
         });
         
