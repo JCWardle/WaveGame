@@ -1,4 +1,4 @@
-import IInputs from './IInputs';
+import IInputs from './IInput';
 
 export default class Input {
     private moving: boolean;

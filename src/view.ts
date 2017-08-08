@@ -71,6 +71,12 @@ export default class View {
         this.boat.x = model.boat.position[0];
         this.boat.y = model.boat.position[1];
         this.boat.rotation = model.boat.angle;
+
+        let circle = new PIXI.Graphics();
+        circle.beginFill(0x123456);
+        circle.drawRect(this.boat.x, this.boat.y, 25, 25);
+        circle.endFill();
+        this.container.addChild(circle);
     }
 
     private sizeStage() : void {
