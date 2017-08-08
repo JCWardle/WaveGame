@@ -2,6 +2,7 @@
 
 import * as PIXI from 'pixi.js';
 import IGameModel from './gameModel';
+import ViewDebugger from './viewDebugger';
 import Constants from './constants';
 
 export default class View {
@@ -11,8 +12,10 @@ export default class View {
     private waterStart: number;
     private boat: PIXI.Graphics;
     private application: PIXI.Application;
+    private debugger: ViewDebugger;
 
     constructor() {
+        this.debugger = new ViewDebugger();
         this.application = new PIXI.Application(window.innerWidth, window.innerHeight,
         {
             backgroundColor: 0x87ceeb
@@ -42,8 +45,11 @@ export default class View {
     }
 
     public render(model: IGameModel): void {
-
         this.drawPlayer(model);
+
+        if(model.debug) {
+            this.debugger.draw(this.container, model);
+        }
 
         this.application.render();
     }
@@ -60,7 +66,6 @@ export default class View {
 
     private drawWater(): void {
         let rectangle: PIXI.Graphics = new PIXI.Graphics();
-        let rectangleHeight = 1;
         rectangle.beginFill(0x000080);
         rectangle.drawRect(-Constants.WIDTH / 2, (-Constants.HEIGHT / 2), Constants.WIDTH, Constants.WATER_HEIGHT * 2);
         rectangle.endFill();
@@ -71,12 +76,6 @@ export default class View {
         this.boat.x = model.boat.position[0];
         this.boat.y = model.boat.position[1];
         this.boat.rotation = model.boat.angle;
-
-        let circle = new PIXI.Graphics();
-        circle.beginFill(0x123456);
-        circle.drawRect(this.boat.x, this.boat.y, 25, 25);
-        circle.endFill();
-        this.container.addChild(circle);
     }
 
     private sizeStage() : void {

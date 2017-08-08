@@ -110,9 +110,7 @@ export default class Game {
 
     private moveBoat(): void {
         if(this.inputs.move) {
-            var thrustVec = [this.boat.position[0], this.boat.position[1] - 20];
-
-            this.boat.applyForce([10, 0], thrustVec);
+            this.boat.applyForce([200, 100], [-10,-10]);
         }
     }
 
@@ -122,7 +120,8 @@ export default class Game {
         this.world.step(t);
 
         return {
-            boat: this.boat
+            boat: this.boat,
+            debug: this.inputs.debug
         };
     }
 }

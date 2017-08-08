@@ -20,7 +20,7 @@ export class Startup {
             let inputs = this.inputHandler.update();
             
             // Move physics bodies forward in time
-            let gameModel = this.game.update(1/60);
+            let gameModel = this.game.update(1/60, inputs);
 
             this.view.render(gameModel);
         }
