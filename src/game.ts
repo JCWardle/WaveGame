@@ -6,7 +6,7 @@ import IInput from './IInput';
 export default class Game {
     private boat:p2.Body;
     private world:p2.World;
-    private k = 100; // up force per submerged "volume"
+    private k = 10; // up force per submerged "volume"
     private viscosity = 0.5; // viscosity
     private inputs: IInput;
 
@@ -16,16 +16,15 @@ export default class Game {
         });        
         
         // Create "water surface"
-        let planeShape: p2.Plane = new p2.Plane();
         let plane: p2.Body = new p2.Body({
             position:[0, -(Constants.HEIGHT / 2) + Constants.WATER_HEIGHT]
         });
-        plane.addShape(planeShape);
+        plane.addShape(new p2.Plane());
         this.world.addBody(plane);
 
         this.boat = new p2.Body({
             mass: 1,
-            position: [-(Constants.WIDTH / 2) + 400 , -(Constants.HEIGHT / 2) + Constants.WATER_HEIGHT + 50],
+            position: [-(Constants.WIDTH / 2) + 400 , -(Constants.HEIGHT / 2) + Constants.WATER_HEIGHT],
             angularVelocity: 0
         });
         
@@ -33,9 +32,9 @@ export default class Game {
         this.world.addBody(this.boat);
 
         this.world.on('postStep', () => {
-            this.applyAABBBuoyancyForces(this.boat, plane.position, this.k, this.viscosity);
             this.moveBoat();
-        })
+            this.applyAABBBuoyancyForces(this.boat, plane.position, this.k, this.viscosity);
+        });
     }
 
     private convertVertices(toConvert: number[]): number[][] {
@@ -109,8 +108,12 @@ export default class Game {
     }
 
     private moveBoat(): void {
-        if(this.inputs.move) {
-            this.boat.applyForce([200, 100], [-10,-10]);
+        if(this.inputs.move && this.boat.position[0] < Constants.MAX_BOAT_X && this.boat) {
+            this.boat.applyForce([200, 0], [0,0]); // X movement
+            this.boat.applyForce([0, 40], [60,20]); // Y movement
+        } else if (this.boat.position[0] > Constants.MAX_BOAT_X || !this.inputs.move) { 
+            this.boat.applyForce([-200, 0], [0,0]); // X movement
+            this.boat.applyForce([0, -20], [60,20]); // Y movement
         }
     }
 
@@ -121,7 +124,8 @@ export default class Game {
 
         return {
             boat: this.boat,
-            debug: this.inputs.debug
+            debug: this.inputs.debug,
+            world: this.world
         };
     }
 }
