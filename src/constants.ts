@@ -1,9 +1,9 @@
 export default class Constants {
-    public static HEIGHT: number = 1080;
-    public static WIDTH: number = 1920;
+    public static HEIGHT: number = 540
+    public static WIDTH: number = 920;
 
     public static WATER_HEIGHT: number = 20;
-    public static MAX_BOAT_X: number = (1920 / 4); //0 is the middle
+    public static MAX_BOAT_X: number = (920 / 4); //0 is the middle
 
     public static BOAT_VERTICES: number[] = [
             0, 0, //bottom left corner

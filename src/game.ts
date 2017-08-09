@@ -6,8 +6,8 @@ import IInput from './IInput';
 export default class Game {
     private boat:p2.Body;
     private world:p2.World;
-    private k = 100; // up force per submerged "volume"
-    private viscosity = 0.5; // viscosity
+    private k = 5; // up force per submerged "volume"
+    private viscosity = 1; // viscosity
     private inputs: IInput;
 
     constructor() {
@@ -24,7 +24,7 @@ export default class Game {
 
         this.boat = new p2.Body({
             mass: 1,
-            position: [-(Constants.WIDTH / 2) + 400 , -(Constants.HEIGHT / 2) + Constants.WATER_HEIGHT],
+            position: [0, -(Constants.HEIGHT / 2) + Constants.WATER_HEIGHT],
             angularVelocity: 0
         });
         
@@ -109,11 +109,11 @@ export default class Game {
 
     private moveBoat(): void {
         if(this.inputs.move && this.boat.position[0] < Constants.MAX_BOAT_X && this.boat) {
-            this.boat.applyForce([200, 0], [0,0]); // X movement
-            this.boat.applyForce([0, 40], [60,20]); // Y movement
+            this.boat.applyForce([400, 0], [-37, -12.5]); // X movement
+            //this.boat.applyForce([0, 40], [60,20]); // Y movement
         } else if (this.boat.position[0] > Constants.MAX_BOAT_X || !this.inputs.move) { 
-            this.boat.applyForce([-200, 0], [0,0]); // X movement
-            this.boat.applyForce([0, -20], [60,20]); // Y movement
+            this.boat.applyForce([-200, 0], [37, 0]); // X movement
+            //this.boat.applyForce([0, -20], [60,20]); // Y movement
         }
     }
 

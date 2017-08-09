@@ -57,6 +57,7 @@ export default class View {
         this.boat.anchor.set(0.5, 0.5);
         this.boat.width = 84;
         this.boat.height = 35;
+        this.boat.scale.y = -1;
         this.container.addChild(this.boat);
     }
 
