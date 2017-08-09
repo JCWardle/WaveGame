@@ -6,7 +6,7 @@ import IInput from './IInput';
 export default class Game {
     private boat:p2.Body;
     private world:p2.World;
-    private k = 10; // up force per submerged "volume"
+    private k = 100; // up force per submerged "volume"
     private viscosity = 0.5; // viscosity
     private inputs: IInput;
 
@@ -117,10 +117,10 @@ export default class Game {
         }
     }
 
-    public update(t: number, inputs: IInput): IGameModel {
+    public update(t: number, deltaTime:number, inputs: IInput): IGameModel {
         this.inputs = inputs;
 
-        this.world.step(t);
+        this.world.step(t, deltaTime, 10);
 
         return {
             boat: this.boat,

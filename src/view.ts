@@ -1,5 +1,3 @@
-/// <reference path="../PIXI.d.ts" />
-
 import * as PIXI from 'pixi.js';
 import IGameModel from './gameModel';
 import ViewDebugger from './viewDebugger';
@@ -10,7 +8,7 @@ export default class View {
     private widthScale: number;
     private heightScale: number;
     private waterStart: number;
-    private boat: PIXI.Graphics;
+    private boat: PIXI.Sprite;
     private application: PIXI.Application;
     private debugger: ViewDebugger;
 
@@ -55,12 +53,10 @@ export default class View {
     }
 
     private drawBoat(): void {
-        this.boat = new PIXI.Graphics();
-        this.boat.beginFill(0x00000);
-
-        this.boat.drawPolygon(Constants.BOAT_VERTICES);
-
-        this.boat.endFill();
+        this.boat = PIXI.Sprite.fromImage('assets/boat.png');
+        this.boat.anchor.set(0.5, 0.5);
+        this.boat.width = 84;
+        this.boat.height = 35;
         this.container.addChild(this.boat);
     }
 

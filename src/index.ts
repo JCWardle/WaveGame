@@ -8,6 +8,8 @@ export class Startup {
     private view:View;
     private gameLoop: any;
     private inputHandler: Input;
+    private fixedTimeStep: number = 1 / 60;
+    private lastTime: number;
 
     public main(): void {
         this.view = new View();
@@ -19,8 +21,9 @@ export class Startup {
 
             let inputs = this.inputHandler.update();
             
+            let deltaTime = this.lastTime ? (t - this.lastTime) / 1000 : 0;
             // Move physics bodies forward in time
-            let gameModel = this.game.update(1/60, inputs);
+            let gameModel = this.game.update(1/60, deltaTime, inputs);
 
             this.view.render(gameModel);
         }
