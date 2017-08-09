@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js';
 import * as p2 from 'p2';
-import IGameModel from './gameModel';
+import IGameModel from './IGameModel';
 import Constants from './constants';
 
 export default class ViewDebugger {

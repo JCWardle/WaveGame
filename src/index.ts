@@ -1,7 +1,7 @@
 import View from './view';
 import Game from './game';
 import Input from './input';
-import gameModel from './gameModel';
+import gameModel from './IGameModel';
 
 export class Startup {
     private game:Game;
