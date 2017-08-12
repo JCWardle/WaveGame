@@ -18,8 +18,8 @@
   },
   "homepage": "https://github.com/JCWardle/WaveGame",
   "dependencies": {
-    "@types/p2": "^0.7.30",
-    "p2": "^0.7.1"
+    "p2": "^0.7.1",
+    "pixi.js": "^4.5.4"
   },
   "devDependencies": {
     "@types/pixi.js": "^4.5.2",
