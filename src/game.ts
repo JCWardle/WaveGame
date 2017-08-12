@@ -7,10 +7,9 @@ export default class Game {
     private boat:p2.Body;
     private water:p2.Body;
     private world:p2.World;
-    private k = 0.1 // up force per submerged "volume"
-    private viscosity = 10; // viscosity
     private inputs: IInput;
     private obstacle: p2.Body;
+    private waterContactPairs: Array<ICollidingPair>;
 
     constructor() {
         this.world = new p2.World({
@@ -22,7 +21,7 @@ export default class Game {
             position:[0, -(Constants.HEIGHT / 2) + Constants.WATER_HEIGHT],
             collisionResponse: false
         });
-        this.water.addShape(new p2.Plane());
+        this.water.addShape(new p2.Plane({sensor: true}));
         this.world.addBody(this.water);
 
         this.boat = new p2.Body({
@@ -45,8 +44,38 @@ export default class Game {
 
         this.world.on('postStep', () => {
             this.moveBoat();            
-            this.applyAABBBuoyancyForces(this.obstacle, this.water.position, this.k, this.viscosity);
-            this.applyAABBBuoyancyForces(this.boat, this.water.position, this.k, this.viscosity);
+        });
+
+        this.world.on('beginContact', (event:any) => {
+            let water: p2.Body;
+            let object: p2.Body;
+
+            if(event.shapeA.sensor) {
+                this.waterContactPairs.push({
+                    water: <p2.Body> event.bodyA,
+                    body: <p2.Body> event.bodyB
+                });
+            } else {
+                this.waterContactPairs.push({
+                    water: <p2.Body> event.bodyB,
+                    body: <p2.Body> event.bodyA
+                });
+            }
+        });
+
+        this.world.on('endContact', (event:any) => {
+            let water: p2.Body;
+            let object: p2.Body;
+
+            if(event.shapeA.sensor) {
+                this.waterContactPairs = this.waterContactPairs.filter((pair: ICollidingPair) => {
+                    pair.body != event.bodyB && pair.water != event.bodyA
+                });
+            } else {
+                this.waterContactPairs = this.waterContactPairs.filter((pair: ICollidingPair) => {
+                    pair.body != event.bodyA && pair.water != event.bodyB
+                });
+            }
         });
     }
 
@@ -65,59 +94,6 @@ export default class Game {
 
         result.length = result.length - 1;
         return result;
-    }
-
-    private applyAABBBuoyancyForces(body: any, planePosition: number[], k: number, c: number) {
-        let shapePosition: Array<number> = [0,0];
-        let shapeAngle: number = 0;
-        let aabb: p2.AABB = new p2.AABB();
-        let centerOfBouyancy: Array<number> = [0,0];
-        let liftForce: Array<number> = [0,0];
-        let viscousForce: Array<number> = [0,0];
-        let v: Array<number> = [0,0];
-        for (var i = 0; i < body.shapes.length; i++) {
-
-            var shape = body.shapes[i];
-
-            // Get shape world transform
-            body.vectorToWorldFrame(shapePosition, shape.position);
-            p2.vec2.add(shapePosition, shapePosition, body.position);
-            shapeAngle = shape.angle + body.angle;
-
-            // Get shape AABB
-            shape.computeAABB(aabb, shapePosition, shapeAngle);
-
-            var areaUnderWater;
-            if(aabb.upperBound[1] < planePosition[1]){
-                // Fully submerged
-                p2.vec2.copy(centerOfBouyancy,shapePosition);
-                areaUnderWater = shape.area;
-            } else if(aabb.lowerBound[1] < planePosition[1]){
-                // Partially submerged
-                var width = aabb.upperBound[0] - aabb.lowerBound[0];
-                var height = (-(Constants.HEIGHT / 2) + Constants.WATER_HEIGHT) - aabb.lowerBound[1];
-                areaUnderWater = width * height;
-                p2.vec2.set(centerOfBouyancy, aabb.lowerBound[0] + width / 2, aabb.lowerBound[1] + height / 2);
-            } else {
-                continue;
-            }
-
-            // Compute lift force
-            p2.vec2.subtract(liftForce, planePosition, centerOfBouyancy);
-            p2.vec2.scale(liftForce, liftForce, areaUnderWater * k);
-            liftForce[0] = 0;
-
-            // Make center of bouycancy relative to the body
-            p2.vec2.subtract(centerOfBouyancy,centerOfBouyancy,body.position);
-
-            // Viscous force
-            body.getVelocityAtPoint(v, centerOfBouyancy);
-            p2.vec2.scale(viscousForce, v, -c);
-
-            // Apply forces
-            body.applyForce(viscousForce,centerOfBouyancy);
-            body.applyForce(liftForce,centerOfBouyancy);
-        }
     }
 
     private moveBoat(): void {
@@ -142,4 +118,9 @@ export default class Game {
             water: this.water
         };
     }
+}
+
+export interface ICollidingPair {
+    water: p2.Body,
+    body: p2.Body
 }
