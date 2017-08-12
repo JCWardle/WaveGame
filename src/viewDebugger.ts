@@ -65,7 +65,7 @@ export default class ViewDebugger {
         stage.addChild(this.aABBGraphics);
         this.aABBGraphics.lineStyle(5, 0x00FF00, 1);
         for(let i = 0; i < game.world.bodies.length; i++) {
-            let body = game.world.bodies[i].getAABB();
+            let body: p2.AABB = game.world.bodies[i].getAABB();
             this.aABBGraphics.drawRect(body.lowerBound[0], body.lowerBound[1], body.upperBound[0] - body.lowerBound[0], body.upperBound[1] - body.lowerBound[1]);
         }
     }
