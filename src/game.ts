@@ -7,9 +7,10 @@ export default class Game {
     private boat:p2.Body;
     private water:p2.Body;
     private world:p2.World;
-    private k = 0.001 // up force per submerged "volume"
-    private viscosity = 2; // viscosity
+    private k = 0.1 // up force per submerged "volume"
+    private viscosity = 10; // viscosity
     private inputs: IInput;
+    private obstacle: p2.Body;
 
     constructor() {
         this.world = new p2.World({
@@ -18,7 +19,8 @@ export default class Game {
         
         // Create "water surface"
         this.water = new p2.Body({
-            position:[0, -(Constants.HEIGHT / 2) + Constants.WATER_HEIGHT]
+            position:[0, -(Constants.HEIGHT / 2) + Constants.WATER_HEIGHT],
+            collisionResponse: false
         });
         this.water.addShape(new p2.Plane());
         this.world.addBody(this.water);
@@ -32,8 +34,18 @@ export default class Game {
         this.boat.fromPolygon(this.convertVertices(Constants.BOAT_VERTICES));
         this.world.addBody(this.boat);
 
+        this.obstacle = new p2.Body({
+            mass: .1,
+            position: [250, -(Constants.HEIGHT / 2) + Constants.WATER_HEIGHT + 100],
+            angle: 45
+        });
+
+        this.obstacle.addShape(new p2.Box({ height: 100, width: 100 }));
+        this.world.addBody(this.obstacle);
+
         this.world.on('postStep', () => {
-            this.moveBoat();
+            this.moveBoat();            
+            this.applyAABBBuoyancyForces(this.obstacle, this.water.position, this.k, this.viscosity);
             this.applyAABBBuoyancyForces(this.boat, this.water.position, this.k, this.viscosity);
         });
     }
@@ -113,7 +125,7 @@ export default class Game {
             this.boat.applyForce([400, 0], [-37, -12.5]); // X movement
             //this.boat.applyForce([0, 40], [60,20]); // Y movement
         } else if (this.boat.position[0] > Constants.MAX_BOAT_X || !this.inputs.move) { 
-            this.boat.applyForce([-200, 0], [37, 0]); // X movement
+            //this.boat.applyForce([-200, 0], [37, 0]); // X movement
             //this.boat.applyForce([0, -20], [60,20]); // Y movement
         }
     }

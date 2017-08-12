@@ -7,32 +7,30 @@ export default class ViewDebugger {
     private thrustVectorX: PIXI.Graphics;
     private DeaccelVector: PIXI.Graphics;
     private aABBGraphics: PIXI.Graphics;
-    private polygons: PIXI.Graphics
+    private shapes: PIXI.Graphics
 
     constructor() {
         this.aABBGraphics = new PIXI.Graphics();
-        this.polygons = new PIXI.Graphics();
+        this.shapes = new PIXI.Graphics();
     }
 
     public draw(stage:PIXI.Container, game:IGameModel):void {
         this.drawThrustVector(stage, game);
         this.drawDeaccelVector(stage, game);
         this.drawAABBs(stage, game);
-        this.drawPolygons(stage, game);
+        this.drawShapes(stage, game);
     }
 
-    public drawPolygons(stage:PIXI.Container, game:IGameModel):void {
-        this.polygons.clear();
-        this.polygons.lineStyle(5, 0x0000FF, 1);
-        this.polygons.beginFill(0x000000, .25);
+    public drawShapes(stage:PIXI.Container, game:IGameModel):void {
+        this.shapes.clear();
+        this.shapes.lineStyle(5, 0x0000FF, 1);
+        this.shapes.beginFill(0x000000, .25);
 
         for(let body of game.world.bodies) {
             let shapes:Array<p2.Shape> = body.shapes;
             
             for(let shape of shapes) {
-                if(shape.type != p2.Shape.CONVEX) {
-                    continue;
-                } else {
+                if(shape.type == p2.Shape.CONVEX) {
                     let convex: p2.Convex = <p2.Convex>shape;
                     let angle: number= body.angle;
                     let posX: number = body.position[0];
@@ -46,17 +44,26 @@ export default class ViewDebugger {
                         let y = vert[1] + body.position[1];
 
                         if(v == '0') {
-                            this.polygons.moveTo(x, y);
+                            this.shapes.moveTo(x, y);
                         } else {
-                            this.polygons.lineTo(x,y);
+                            this.shapes.lineTo(x,y);
                         }
                     }
+                } else if (shape.type == p2.Shape.BOX) {
+                    let box = <p2.Box>shape;
+                    let x = body.position[0] - (box.width / 2);
+                    let y = body.position[1] - (box.height / 2);
+
+                    console.log(x);
+
+                    let rec: PIXI.Graphics = this.shapes.drawRect(x, y, box.width, box.height);
+                    //rec.rotation = body.angle;
                 }
             }
         }
 
-        this.polygons.endFill();
-        stage.addChild(this.polygons);
+        this.shapes.endFill();
+        stage.addChild(this.shapes);
     }
 
     public drawAABBs(stage:PIXI.Container, game:IGameModel): void {

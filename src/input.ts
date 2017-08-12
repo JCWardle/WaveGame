@@ -2,7 +2,7 @@ import IInputs from './IInput';
 
 export default class Input {
     private moving: boolean;
-    private debug: boolean;
+    private debug: boolean = true;
 
     constructor() {
         window.addEventListener('keydown', (event:KeyboardEvent) => {
