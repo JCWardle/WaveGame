@@ -1,33 +1,32 @@
 import * as p2 from 'p2';
+import * as GreinerHormann from 'greiner-hormann';
 
 export default class PolygonIntersection {
-    public static Intersection(water:p2.Body, polygon:p2.Body) {
+    //Returns an array of polygons that intersect with the water.
+    //Each polygon is an array of points, each point is an array of 2 with x and y co-ordinates
+    public static Intersection(water:p2.Body, polygon:p2.Body): number[][][] {
         let waterVertices: number[][];
         let polygonVertices: number[][];
 
         waterVertices = this.planeVertices(water);
         polygonVertices = this.polygonVertices(polygon);
-
-
+        return GreinerHormann.intersection(waterVertices, polygonVertices);
     }
 
-    private static PolygonIntersection(polygonA:number[][], polygonB:number[][]) {
-        
-    }
 
     private static planeVertices(water: p2.Body) {
-        let result :number[][];
+        let result :number[][] = new Array<number[]>();
 
         result.push([ water.position[0] - 10000, water.position[1] ]) //topleft
         result.push([ water.position[0] + 10000, water.position[1] ]) //topright
-        result.push([ water.position[0] + 10000, water.position[1] + 10000 ]) //bottom left
-        result.push([ water.position[0] - 10000, water.position[1] + 10000 ]) //bottom right
+        result.push([ water.position[0] + 10000, water.position[1] - 10000 ]) //bottom left
+        result.push([ water.position[0] - 10000, water.position[1] - 10000 ]) //bottom right
 
         return result;
     }
 
     private static polygonVertices(polygon: p2.Body) {
-        let result :number[][];
+        let result :number[][] = new Array<number[]>();
 
         for(let shape of polygon.shapes) {
             let convex: p2.Convex = <p2.Convex>shape;

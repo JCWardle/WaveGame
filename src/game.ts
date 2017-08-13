@@ -2,6 +2,7 @@ import * as p2 from 'p2';
 import IGameModel from './IGameModel';
 import Constants from './constants';
 import IInput from './IInput';
+import PolygonIntersection from './helpers/polygonIntersection';
 
 export default class Game {
     private boat:p2.Body;
@@ -9,7 +10,8 @@ export default class Game {
     private world:p2.World;
     private inputs: IInput;
     private obstacle: p2.Body;
-    private waterContactPairs: Array<ICollidingPair>;
+    private density: number = 1;
+    private waterContactPairs: Array<ICollidingPair> = new Array<ICollidingPair>();
 
     constructor() {
         this.world = new p2.World({
@@ -43,40 +45,65 @@ export default class Game {
         this.world.addBody(this.obstacle);
 
         this.world.on('postStep', () => {
-            this.moveBoat();            
+            this.moveBoat();
+            this.waterUpdate();
         });
 
-        this.world.on('beginContact', (event:any) => {
-            let water: p2.Body;
-            let object: p2.Body;
+        this.world.on('beginContact', (event) => { this.beginContact(event); });
 
-            if(event.shapeA.sensor) {
-                this.waterContactPairs.push({
-                    water: <p2.Body> event.bodyA,
-                    body: <p2.Body> event.bodyB
-                });
-            } else {
-                this.waterContactPairs.push({
-                    water: <p2.Body> event.bodyB,
-                    body: <p2.Body> event.bodyA
-                });
+        this.world.on('endContact', (event) => { this.endContact(event); });
+    }
+
+    private waterUpdate(): void {
+        for(let p of this.waterContactPairs) {
+            let pair: ICollidingPair = <ICollidingPair> p;
+            //Intersect is an array of polygons that intersec
+            let intersect: number[][][] = PolygonIntersection.Intersection(pair.water, pair.body);
+
+            if(intersect != null && intersect.length != 0) {
+                let polygon: ICalculatedPolygon = this.polygonArea(intersect[0]);
+
+                let displacedMass:number = this.density * polygon.area;
+                let buoyancyForce: number = displacedMass * 1;
+                //Tranform world point to be body relative
+                let localCenter:number[] = [0,0];
+                pair.body.toLocalFrame(localCenter, polygon.center);
+                pair.body.applyForce([0, buoyancyForce], [0,0]);
             }
-        });
+        }
+    }
 
-        this.world.on('endContact', (event:any) => {
-            let water: p2.Body;
-            let object: p2.Body;
+    private beginContact(event:any):void {
+        let pair : ICollidingPair;
 
-            if(event.shapeA.sensor) {
-                this.waterContactPairs = this.waterContactPairs.filter((pair: ICollidingPair) => {
-                    pair.body != event.bodyB && pair.water != event.bodyA
-                });
-            } else {
-                this.waterContactPairs = this.waterContactPairs.filter((pair: ICollidingPair) => {
-                    pair.body != event.bodyA && pair.water != event.bodyB
-                });
-            }
-        });
+        if(event.shapeA.sensor) {
+            pair = {
+                water: <p2.Body> event.bodyA,
+                body: <p2.Body> event.bodyB
+            };
+        } else {
+            pair = {
+                water: <p2.Body> event.bodyB,
+                body: <p2.Body> event.bodyA
+            };
+        }
+
+        this.waterContactPairs.push(pair);
+    }
+
+    private endContact(event:any):void {
+        let water: p2.Body;
+        let object: p2.Body;
+
+        if(event.shapeA.sensor) {
+            this.waterContactPairs = this.waterContactPairs.filter((pair: ICollidingPair) => {
+                pair.body != event.bodyB && pair.water != event.bodyA
+            });
+        } else {
+            this.waterContactPairs = this.waterContactPairs.filter((pair: ICollidingPair) => {
+                pair.body != event.bodyA && pair.water != event.bodyB
+            });
+        }
     }
 
     private convertVertices(toConvert: number[]): number[][] {
@@ -118,9 +145,58 @@ export default class Game {
             water: this.water
         };
     }
+
+    //http://www.iforce2d.net/b2dtut/buoyancy
+    private polygonArea(polygon:number[][]): ICalculatedPolygon {
+        let e1: number[] = [0, 0];
+        let e2: number[] = [0, 0];
+        let result: ICalculatedPolygon = {
+            area: 0,
+            center: [0,0]
+        };
+
+        let first: number[] = polygon[0];
+
+        for (let i = 2; i < polygon.length; i++) {
+            let pos2 = polygon[i - 1];
+            let pos3 = polygon[i];
+            p2.vec2.subtract(e1, pos2, first);
+            p2.vec2.subtract(e2, pos3, first);
+
+            let cross: number = p2.vec2.crossLength(e1, e2);
+
+            result.area += -0.5 * cross;
+
+            let centerOfThisTriangle: number[] = [0, 0];
+            p2.vec2.centroid(centerOfThisTriangle, first, pos2, pos3);
+
+            let scale: number[] = [0, 0];
+            //Multiple area by center of the triangle
+            p2.vec2.scale(scale, centerOfThisTriangle, result.area);
+
+            let newCenter: number[] = [0, 0];
+            p2.vec2.add(newCenter, result.center, scale);
+            result.center = newCenter;
+        }
+
+        //Centroid
+        if(result.area > Number.EPSILON) {
+            let newCenter: number[] = [0, 0];
+            p2.vec2.scale(newCenter, result.center, 1 / result.area);
+            result.center = newCenter;
+        } else {
+            result.area = 0;
+        }
+        return result;
+    }
 }
 
 export interface ICollidingPair {
     water: p2.Body,
     body: p2.Body
+}
+
+export interface ICalculatedPolygon {
+    center: number[],
+    area: number
 }

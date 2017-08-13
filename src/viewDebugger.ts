@@ -57,7 +57,6 @@ export default class ViewDebugger {
                     console.log(x);
 
                     let rec: PIXI.Graphics = this.shapes.drawRect(x, y, box.width, box.height);
-                    //rec.rotation = body.angle;
                 }
             }
         }
