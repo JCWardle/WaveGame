@@ -10,7 +10,7 @@ export default class Game {
     private world:p2.World;
     private inputs: IInput;
     private obstacle: p2.Body;
-    private density: number = 1;
+    private density: number = 5;
     private waterContactPairs: Array<ICollidingPair> = new Array<ICollidingPair>();
 
     constructor() {
@@ -63,12 +63,14 @@ export default class Game {
             if(intersect != null && intersect.length != 0) {
                 let polygon: ICalculatedPolygon = this.polygonArea(intersect[0]);
 
-                let displacedMass:number = this.density * polygon.area;
-                let buoyancyForce: number = displacedMass * 1;
-                //Tranform world point to be body relative
+                let displacedMass:number = pair.body.mass * polygon.area;
+                let buoyancyForce:number[] = [0, 0];
+
+                p2.vec2.scale(buoyancyForce, this.world.gravity, displacedMass);
+                //Tranform world point to be body relative5
                 let localCenter:number[] = [0,0];
                 pair.body.toLocalFrame(localCenter, polygon.center);
-                pair.body.applyForce([0, buoyancyForce], [0,0]);
+                pair.body.applyForce(buoyancyForce, localCenter);
             }
         }
     }
@@ -97,13 +99,14 @@ export default class Game {
 
         if(event.shapeA.sensor) {
             this.waterContactPairs = this.waterContactPairs.filter((pair: ICollidingPair) => {
-                pair.body != event.bodyB && pair.water != event.bodyA
+                return pair.body == event.bodyB && pair.water == event.bodyA;
             });
         } else {
             this.waterContactPairs = this.waterContactPairs.filter((pair: ICollidingPair) => {
-                pair.body != event.bodyA && pair.water != event.bodyB
+                return pair.body == event.bodyA && pair.water == event.bodyB;
             });
         }
+        console.log(this.waterContactPairs);
     }
 
     private convertVertices(toConvert: number[]): number[][] {
@@ -155,24 +158,32 @@ export default class Game {
             center: [0,0]
         };
 
-        let first: number[] = polygon[0];
+        let referencePoint: number[] = [0, 0];
 
-        for (let i = 2; i < polygon.length; i++) {
-            let pos2 = polygon[i - 1];
-            let pos3 = polygon[i];
-            p2.vec2.subtract(e1, pos2, first);
-            p2.vec2.subtract(e2, pos3, first);
+        for (let i = 0; i < polygon.length; i++) {
+            let pos1 = referencePoint;
+            let pos2 = polygon[i];            
+            let pos3: number[];
+            if(i + 1 < polygon.length) {
+                pos3 = polygon[i + 1]
+            } else {
+                pos3 = polygon[0];
+            }
+
+            p2.vec2.subtract(e1, pos2, pos1);
+            p2.vec2.subtract(e2, pos3, pos1);
 
             let cross: number = p2.vec2.crossLength(e1, e2);
 
-            result.area += -0.5 * cross;
+            let area = 0.5 * cross;
+            result.area += area;
 
             let centerOfThisTriangle: number[] = [0, 0];
-            p2.vec2.centroid(centerOfThisTriangle, first, pos2, pos3);
+            p2.vec2.centroid(centerOfThisTriangle, pos1, pos2, pos3);
 
             let scale: number[] = [0, 0];
             //Multiple area by center of the triangle
-            p2.vec2.scale(scale, centerOfThisTriangle, result.area);
+            p2.vec2.scale(scale, centerOfThisTriangle, area);
 
             let newCenter: number[] = [0, 0];
             p2.vec2.add(newCenter, result.center, scale);
