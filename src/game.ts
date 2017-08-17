@@ -66,8 +66,8 @@ export default class Game {
                 let displacedMass:number = pair.body.mass * polygon.area;
                 let buoyancyForce:number[] = [0, 0];
 
-                p2.vec2.scale(buoyancyForce, this.world.gravity, displacedMass);
-                //Tranform world point to be body relative5
+                p2.vec2.scale(buoyancyForce, [0,100], displacedMass);
+                //Tranform world point to be body relative
                 let localCenter:number[] = [0,0];
                 pair.body.toLocalFrame(localCenter, polygon.center);
                 pair.body.applyForce(buoyancyForce, localCenter);
